@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>兌換中心</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#FAF7F2; --card:#FFFFFF; --ink:#2B2B33; --ink-soft:#6E6E78;
+  --brand:#2E6E5E; --brand-soft:#E7F0ED; --accent:#D98E4A;
+  --line:#E8E2D9; --error:#C4554D;
+  --sans:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;
+  --serif:"Noto Serif TC",serif;
+  --mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.65}
+.wrap{max-width:720px;margin:0 auto;padding:0 20px}
+
+/* 頁首 */
+header{padding:56px 0 40px;text-align:center}
+.logo{display:inline-grid;place-items:center;width:64px;height:64px;border-radius:18px;background:var(--brand);color:#fff;font-family:var(--serif);font-size:30px;margin-bottom:18px}
+h1{font-family:var(--serif);font-size:32px;letter-spacing:.04em}
+h1 small{display:block;font-family:var(--sans);font-size:13px;color:var(--ink-soft);font-weight:400;letter-spacing:.2em;margin-top:6px}
+.tagline{margin-top:14px;color:var(--ink-soft);font-size:17px}
+
+/* 區塊 */
+.sec{padding:34px 0}
+.sec h2{font-family:var(--serif);font-size:22px;margin-bottom:6px}
+.sec .sub{color:var(--ink-soft);font-size:14px;margin-bottom:20px}
+
+/* 兌換項目卡 */
+.items{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.item{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 18px;cursor:pointer;transition:transform .15s,box-shadow .15s;display:grid;gap:8px;user-select:none}
+.item:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(43,43,51,.08)}
+.item.active{box-shadow:0 0 0 2.5px var(--brand);transform:translateY(-2px)}
+.item .icon{font-size:26px}
+.item h3{font-size:17px}
+.item p{font-size:13px;color:var(--ink-soft)}
+.item .pts{font-family:var(--mono);font-size:14px;color:var(--brand);font-weight:600}
+.item.oil{border-top:3px solid var(--accent)}
+.item.cash{border-top:3px solid var(--brand)}
+.item.gift{border-top:3px solid #8A7BA8}
+
+/* 表單 */
+.form-card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:26px 24px;display:grid;gap:20px}
+.field label{display:block;font-weight:500;margin-bottom:8px}
+.field label small{color:var(--ink-soft);font-weight:400;margin-left:8px;font-size:13px}
+input[type=text]{width:100%;height:52px;border:1.5px solid var(--line);border-radius:10px;padding:0 16px;font-size:18px;font-family:var(--mono);letter-spacing:.12em;background:#FDFCFA;color:var(--ink);outline:none;transition:border-color .15s}
+input[type=text]:focus{border-color:var(--brand)}
+input[type=text].invalid{border-color:var(--error)}
+.hint{font-size:13px;color:var(--ink-soft);margin-top:6px;min-height:20px}
+.hint.err{color:var(--error)}
+.opts{display:grid;gap:10px}
+.opt{display:flex;align-items:center;gap:12px;border:1.5px solid var(--line);border-radius:10px;padding:13px 16px;cursor:pointer;background:#FDFCFA;transition:border-color .15s,background .15s}
+.opt input{accent-color:var(--brand);width:18px;height:18px;flex:none}
+.opt .t{flex:1}
+.opt .t b{font-size:16px}
+.opt .t small{display:block;color:var(--ink-soft);font-size:13px}
+.opt .pts{font-family:var(--mono);font-size:14px;color:var(--brand);font-weight:600}
+.opt.on{border-color:var(--brand);background:var(--brand-soft)}
+.opt.blocked{opacity:.55;cursor:default}
+.opt.blocked .pts{color:var(--error)}
+.limit{display:flex;gap:10px;align-items:flex-start;background:var(--brand-soft);border-radius:10px;padding:12px 14px;font-size:14px;color:var(--brand)}
+.err-banner{background:#FDF2F2;border:1px solid #F0C0BE;border-radius:10px;padding:12px 16px;font-size:14px;color:var(--error);display:none}
+.err-banner.show{display:block}
+.submit{width:100%;height:54px;border:none;border-radius:12px;background:var(--brand);color:#fff;font-size:18px;font-weight:700;font-family:var(--sans);cursor:pointer;letter-spacing:.1em;transition:filter .15s,background .15s}
+.submit:hover:not(:disabled){filter:brightness(1.08)}
+.submit:disabled{background:#C5C9C7;cursor:not-allowed}
+.form-note{font-size:13px;color:var(--ink-soft);text-align:center}
+
+/* 客服區 */
+.line-card{background:#F4F9F0;border:1px solid #DBEAD2;border-radius:16px;padding:24px;display:flex;gap:20px;align-items:center}
+.qr{width:96px;height:96px;border-radius:12px;background:repeating-conic-gradient(#2B2B33 0% 25%,#fff 0% 50%) 50%/24px 24px;border:6px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.08);flex:none}
+.line-card h3{font-size:18px;margin-bottom:6px}
+.line-card p{font-size:14px;color:var(--ink-soft)}
+.line-btn{display:inline-block;margin-top:10px;background:#06C755;color:#fff;border-radius:999px;padding:9px 22px;font-size:15px;font-weight:600;text-decoration:none}
+
+/* 成功頁 */
+.success{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:32px 26px;text-align:center;display:grid;gap:14px}
+.success .check{width:56px;height:56px;border-radius:50%;background:var(--brand-soft);color:var(--brand);display:grid;place-items:center;font-size:26px;margin:0 auto}
+.success h2{font-family:var(--serif);font-size:24px}
+.success .summary{font-size:15px;color:var(--ink-soft)}
+.success .summary b{font-family:var(--mono);color:var(--ink)}
+.success .steps{text-align:left;background:#FDFCFA;border:1px solid var(--line);border-radius:10px;padding:14px 18px;font-size:14px;color:var(--ink-soft);display:grid;gap:6px}
+.success .deny{font-size:13px;color:var(--ink-soft)}
+.success .deny a{color:var(--error)}
+
+/* 頁尾 */
+footer{border-top:1px solid var(--line);margin-top:30px;padding:26px 0 44px;font-size:13px;color:var(--ink-soft);text-align:center}
+footer a{color:var(--ink-soft)}
+footer .co{margin-top:8px}
+
+@media(max-width:640px){
+  .items{grid-template-columns:1fr}
+  header{padding:40px 0 28px}
+  h1{font-size:26px}
+  .line-card{flex-direction:column;text-align:center}
+}
+</style>
+</head>
+<body>
+
+<header class="wrap">
+  <div class="logo">兌</div>
+  <h1>兌換中心 <small>品牌名待定・REDEMPTION SERVICE</small></h1>
+  <p class="tagline">完成任務累積的積分，在這裡兌換。</p>
+</header>
+
+<main class="wrap">
+
+  <!-- 兌換項目 -->
+  <section class="sec" id="sec-items">
+    <h2>可兌換項目</h2>
+    <p class="sub">點選項目即帶入下方申請表單；所需積分以送出當時的公告為準。</p>
+    <div class="items" id="item-grid"></div>
+  </section>
+
+  <!-- 申請表單 -->
+  <section class="sec" id="sec-form">
+    <h2>申請兌換</h2>
+    <p class="sub">只需兩步：填編號、選項目。餘額請在您的帳本查看。</p>
+    <div class="form-card">
+      <div class="field">
+        <label for="informant-id">情報員編號 <small>App 個人頁可查</small></label>
+        <input type="text" id="informant-id" placeholder="GI-0000" autocomplete="off" spellcheck="false">
+        <div class="hint" id="id-hint">格式：英文前綴 + 數字</div>
+      </div>
+      <div class="field">
+        <label>兌換項目</label>
+        <div class="opts" id="opts-container"></div>
+      </div>
+      <div class="limit">ⓘ 單筆兌換金額須低於 NT$20,000（達 20,000 以上請分次申請）；發放僅匯入您本人綁定的收款帳戶。</div>
+      <div class="err-banner" id="err-banner"></div>
+      <button class="submit" id="submit-btn" disabled>送出兌換申請</button>
+      <p class="form-note">送出後由專人核對積分與帳戶，處理進度請於您的帳本查看。</p>
+    </div>
+  </section>
+
+  <!-- 申請成功（初始隱藏，送出成功後切換顯示） -->
+  <section class="sec" id="sec-success" style="display:none">
+    <div class="success">
+      <div class="check">✓</div>
+      <h2>申請已送出</h2>
+      <p class="summary" id="success-summary"></p>
+      <div class="steps">
+        <span>① 專人核對積分與綁定帳戶（核對後暫予保留）</span>
+        <span>② 發放至您本人綁定的收款帳戶</span>
+        <span>③ 完成後積分自動扣除，進度請於帳本查看</span>
+      </div>
+      <p class="deny">若這不是您本人的申請，請於帳本<a href="#">一鍵否認</a>。</p>
+      <!-- TODO: 替換 href 為 LINE OA 加好友連結 -->
+      <a class="line-btn" href="#">＋ 加 LINE 好友接收補充通知（選用）</a>
+    </div>
+  </section>
+
+  <!-- 客服 -->
+  <section class="sec">
+    <h2>需要幫忙？</h2>
+    <p class="sub">兌換問題找客服；也可以透過 LINE 直接申請兌換。</p>
+    <div class="line-card">
+      <!-- TODO: 替換 .qr 為實際 QR 圖片 <img src="..."> -->
+      <div class="qr" aria-label="LINE QR（開通後回填）"></div>
+      <div>
+        <h3>LINE 官方帳號客服</h3>
+        <p>週一至週五 10:00–18:00 回覆；申請進度以您的帳本為準。</p>
+        <!-- TODO: 替換 href 為 LINE OA 連結 -->
+        <a class="line-btn" href="#">加入 LINE 客服</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="wrap">
+  <a href="#">隱私政策</a>・<a href="#">服務說明</a>（律師定稿版佔位）
+  <div class="co">◯◯有限公司・統一編號 00000000（依法揭露之最小集、佔位）</div>
+</footer>
+
+<script>
+// ── Mock 資料（TODO: 替換為 GET /exchange/items）─────────────────────────────
+const MOCK_ITEMS = [
+  { id: 'cash', label: '現金',   note: '匯入您綁定的收款帳戶', points: 1000, amount: 1000, blocked: false, icon: '💵', cardClass: 'cash' },
+  { id: 'oil',  label: '加油券', note: '紙本／電子券擇一寄發',  points: 2900, amount: 3000, blocked: false, icon: '⛽', cardClass: 'oil'  },
+  { id: 'gift', label: '禮券',   note: '合作通路禮券',          points: 1450, amount: 1500, blocked: false, icon: '🎁', cardClass: 'gift' },
+];
+
+// ── 狀態 ────────────────────────────────────────────────────────────────────
+let selectedItemId = null;
+let idValid = false;
+let idTouched = false;
+
+// ── 初始化 ──────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  renderItemCards();
+  renderFormOpts();
+
+  const idInput = document.getElementById('informant-id');
+  idInput.addEventListener('input', e => onIdInput(e.target.value));
+  idInput.addEventListener('blur', () => { idTouched = true; refreshIdHint(); });
+
+  document.getElementById('submit-btn').addEventListener('click', submitForm);
+});
+
+// ── 渲染：項目卡 ─────────────────────────────────────────────────────────────
+function renderItemCards() {
+  const grid = document.getElementById('item-grid');
+  grid.innerHTML = MOCK_ITEMS.map(item => `
+    <div class="item ${item.cardClass}" data-item-id="${item.id}"
+         role="button" tabindex="0" aria-label="選擇 ${item.label}">
+      <span class="icon">${item.icon}</span>
+      <h3>${item.label}</h3>
+      <p>${item.note}</p>
+      <span class="pts">${fmtPts(item.points)} ＝ NT$${fmtNum(item.amount)}</span>
+    </div>
+  `).join('');
+
+  grid.querySelectorAll('.item').forEach(el => {
+    el.addEventListener('click', () => onCardClick(el.dataset.itemId));
+    el.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onCardClick(el.dataset.itemId); }
+    });
+  });
+}
+
+// ── 渲染：表單選項 ───────────────────────────────────────────────────────────
+function renderFormOpts() {
+  const container = document.getElementById('opts-container');
+  container.innerHTML = MOCK_ITEMS.map(item => `
+    <label class="opt${item.blocked ? ' blocked' : ''}" data-item-id="${item.id}">
+      <input type="radio" name="item" value="${item.id}" ${item.blocked ? 'disabled' : ''}>
+      <span class="t">
+        <b>${item.label} NT$${fmtNum(item.amount)}</b>
+        <small>${item.note}</small>
+      </span>
+      <span class="pts">${item.blocked ? '已達上限' : fmtPts(item.points)}</span>
+    </label>
+  `).join('');
+
+  container.querySelectorAll('.opt:not(.blocked) input[type=radio]').forEach(radio => {
+    radio.addEventListener('change', () => onRadioChange(radio.value));
+  });
+}
+
+// ── 事件：點擊項目卡 ─────────────────────────────────────────────────────────
+function onCardClick(itemId) {
+  const item = MOCK_ITEMS.find(i => i.id === itemId);
+  if (!item || item.blocked) return;
+
+  selectedItemId = itemId;
+  syncHighlights();
+
+  const radio = document.querySelector(`#opts-container input[value="${itemId}"]`);
+  if (radio) radio.checked = true;
+
+  updateSubmitState();
+  document.getElementById('sec-form').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ── 事件：切換 radio ─────────────────────────────────────────────────────────
+function onRadioChange(itemId) {
+  selectedItemId = itemId;
+  syncHighlights();
+  updateSubmitState();
+}
+
+// ── 視覺同步 ─────────────────────────────────────────────────────────────────
+function syncHighlights() {
+  document.querySelectorAll('#item-grid .item').forEach(el => {
+    el.classList.toggle('active', el.dataset.itemId === selectedItemId);
+  });
+  document.querySelectorAll('#opts-container .opt').forEach(el => {
+    el.classList.toggle('on', el.dataset.itemId === selectedItemId && !el.classList.contains('blocked'));
+  });
+}
+
+// ── 編號驗證 ─────────────────────────────────────────────────────────────────
+function onIdInput(value) {
+  idValid = value.trim().length >= 4;
+  refreshIdHint();
+  updateSubmitState();
+}
+
+function refreshIdHint() {
+  const value = document.getElementById('informant-id').value.trim();
+  const hint = document.getElementById('id-hint');
+  const input = document.getElementById('informant-id');
+
+  if (value.length === 0) {
+    hint.textContent = '格式：英文前綴 + 數字';
+    hint.classList.remove('err');
+    input.classList.remove('invalid');
+  } else if (!idValid && idTouched) {
+    hint.textContent = '請輸入完整的情報員編號';
+    hint.classList.add('err');
+    input.classList.add('invalid');
+  } else {
+    hint.textContent = '';
+    hint.classList.remove('err');
+    input.classList.remove('invalid');
+  }
+}
+
+// ── 送出按鈕狀態 ─────────────────────────────────────────────────────────────
+function updateSubmitState() {
+  document.getElementById('submit-btn').disabled = !(idValid && selectedItemId);
+}
+
+// ── 送出流程 ─────────────────────────────────────────────────────────────────
+async function submitForm() {
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = true;
+  btn.textContent = '送出中…';
+  hideError();
+
+  const informantId = document.getElementById('informant-id').value.trim();
+  const item = MOCK_ITEMS.find(i => i.id === selectedItemId);
+
+  try {
+    // TODO: 替換為 POST /exchange/apply
+    const result = await mockApply(informantId, item);
+    showSuccessPage(result);
+  } catch (err) {
+    showError(err.message);
+    btn.disabled = false;
+    btn.textContent = '送出兌換申請';
+  }
+}
+
+// ── Mock API（TODO: 替換為真實 POST /exchange/apply）────────────────────────
+async function mockApply(informantId, item) {
+  await new Promise(r => setTimeout(r, 800));
+
+  // 模擬錯誤回傳（測試用；正式串接後移除）
+  // throw new Error('找不到此情報員編號，請確認後重試');
+
+  return {
+    informant_id_masked: maskId(informantId),
+    item_label: item.label,
+    amount: item.amount,
+  };
+}
+
+// ── 顯示成功頁 ───────────────────────────────────────────────────────────────
+function showSuccessPage(result) {
+  document.getElementById('success-summary').innerHTML =
+    `編號 <b>${result.informant_id_masked}</b>・${result.item_label} <b>NT$${fmtNum(result.amount)}</b>`;
+
+  document.getElementById('sec-items').style.display = 'none';
+  document.getElementById('sec-form').style.display = 'none';
+  const secSuccess = document.getElementById('sec-success');
+  secSuccess.style.display = '';
+  secSuccess.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ── 錯誤提示 ─────────────────────────────────────────────────────────────────
+function showError(message) {
+  const banner = document.getElementById('err-banner');
+  banner.textContent = message;
+  banner.classList.add('show');
+}
+
+function hideError() {
+  document.getElementById('err-banner').classList.remove('show');
+}
+
+// ── 工具 ─────────────────────────────────────────────────────────────────────
+function maskId(id) {
+  const sep = id.lastIndexOf('-');
+  if (sep === -1) return id;
+  const prefix = id.slice(0, sep);
+  const suffix = id.slice(sep + 1);
+  const keep = 2;
+  const masked = '●'.repeat(Math.max(0, suffix.length - keep)) + suffix.slice(-keep);
+  return `${prefix}-${masked}`;
+}
+
+function fmtNum(n) { return n.toLocaleString('zh-TW'); }
+function fmtPts(n) { return n.toLocaleString('zh-TW') + ' 積分'; }
+</script>
+</body>
+</html>
