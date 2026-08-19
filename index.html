@@ -35,7 +35,9 @@ h1 small{display:block;font-family:var(--sans);font-size:13px;color:var(--ink-so
 .items{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
 .item{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 18px;cursor:pointer;transition:transform .15s,box-shadow .15s;display:grid;gap:8px;user-select:none}
 .item:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(43,43,51,.08)}
-.item.active{box-shadow:0 0 0 2.5px var(--brand);transform:translateY(-2px)}
+.item.cash.active{box-shadow:0 0 0 2.5px var(--brand);transform:translateY(-2px)}
+.item.oil.active{box-shadow:0 0 0 2.5px var(--accent);transform:translateY(-2px)}
+.item.gift.active{box-shadow:0 0 0 2.5px #8A7BA8;transform:translateY(-2px)}
 .item .icon{font-size:26px}
 .item h3{font-size:17px}
 .item p{font-size:13px;color:var(--ink-soft)}
@@ -125,8 +127,8 @@ footer .co{margin-top:8px}
     <div class="form-card">
       <div class="field">
         <label for="informant-id">情報員編號 <small>App 個人頁可查</small></label>
-        <input type="text" id="informant-id" placeholder="GI-0000" autocomplete="off" spellcheck="false">
-        <div class="hint" id="id-hint">格式：英文前綴 + 數字</div>
+        <input type="text" id="informant-id" placeholder="INF**********" maxlength="13" autocomplete="off" spellcheck="false">
+        <div class="hint" id="id-hint">格式：INF + 10 碼英數（共 13 碼）</div>
       </div>
       <div class="field">
         <label>兌換項目</label>
@@ -180,20 +182,32 @@ footer .co{margin-top:8px}
 </footer>
 
 <script>
-// ── Mock 資料（TODO: 替換為 GET /exchange/items）─────────────────────────────
-const MOCK_ITEMS = [
+// ── API 設定（TODO: 正式部署前替換為後端 API URL）────────────────────────────
+const API_BASE = 'https://guardian.nest-creation.com';
+
+// ── 前端專屬圖示與樣式（API 不回傳，依 item.id 對應）──────────────────────
+const ITEM_DISPLAY = {
+  cash: { icon: '💵', cardClass: 'cash' },
+  oil:  { icon: '⛽', cardClass: 'oil'  },
+  gift: { icon: '🎁', cardClass: 'gift' },
+};
+
+// ── 靜態費率（API 端點補齊前的 fallback）────────────────────────────────────
+const FALLBACK_ITEMS = [
   { id: 'cash', label: '現金',   note: '匯入您綁定的收款帳戶', points: 1000, amount: 1000, blocked: false, icon: '💵', cardClass: 'cash' },
   { id: 'oil',  label: '加油券', note: '紙本／電子券擇一寄發',  points: 2900, amount: 3000, blocked: false, icon: '⛽', cardClass: 'oil'  },
   { id: 'gift', label: '禮券',   note: '合作通路禮券',          points: 1450, amount: 1500, blocked: false, icon: '🎁', cardClass: 'gift' },
 ];
 
 // ── 狀態 ────────────────────────────────────────────────────────────────────
+let items = [];
 let selectedItemId = null;
 let idValid = false;
 let idTouched = false;
 
 // ── 初始化 ──────────────────────────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  await loadItems();
   renderItemCards();
   renderFormOpts();
 
@@ -204,10 +218,31 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('submit-btn').addEventListener('click', submitForm);
 });
 
+// ── 取得兌換項目費率 ──────────────────────────────────────────────────────────
+async function loadItems() {
+  try {
+    const res = await fetch(`${API_BASE}/api/redemptions/items`);
+    if (!res.ok) throw new Error('items fetch failed');
+    const data = await res.json();
+    items = (data.items ?? []).map(d => ({
+      id:        d.id,
+      label:     d.label,
+      note:      d.note      ?? '',
+      points:    d.pointsRequired,
+      amount:    d.amount,
+      blocked:   d.blocked   ?? false,
+      icon:      ITEM_DISPLAY[d.id]?.icon      ?? '📦',
+      cardClass: ITEM_DISPLAY[d.id]?.cardClass ?? '',
+    }));
+  } catch {
+    items = FALLBACK_ITEMS;
+  }
+}
+
 // ── 渲染：項目卡 ─────────────────────────────────────────────────────────────
 function renderItemCards() {
   const grid = document.getElementById('item-grid');
-  grid.innerHTML = MOCK_ITEMS.map(item => `
+  grid.innerHTML = items.map(item => `
     <div class="item ${item.cardClass}" data-item-id="${item.id}"
          role="button" tabindex="0" aria-label="選擇 ${item.label}">
       <span class="icon">${item.icon}</span>
@@ -228,7 +263,7 @@ function renderItemCards() {
 // ── 渲染：表單選項 ───────────────────────────────────────────────────────────
 function renderFormOpts() {
   const container = document.getElementById('opts-container');
-  container.innerHTML = MOCK_ITEMS.map(item => `
+  container.innerHTML = items.map(item => `
     <label class="opt${item.blocked ? ' blocked' : ''}" data-item-id="${item.id}">
       <input type="radio" name="item" value="${item.id}" ${item.blocked ? 'disabled' : ''}>
       <span class="t">
@@ -246,7 +281,7 @@ function renderFormOpts() {
 
 // ── 事件：點擊項目卡 ─────────────────────────────────────────────────────────
 function onCardClick(itemId) {
-  const item = MOCK_ITEMS.find(i => i.id === itemId);
+  const item = items.find(i => i.id === itemId);
   if (!item || item.blocked) return;
 
   selectedItemId = itemId;
@@ -278,7 +313,7 @@ function syncHighlights() {
 
 // ── 編號驗證 ─────────────────────────────────────────────────────────────────
 function onIdInput(value) {
-  idValid = value.trim().length >= 4;
+  idValid = value.trim().length === 13;
   refreshIdHint();
   updateSubmitState();
 }
@@ -288,16 +323,12 @@ function refreshIdHint() {
   const hint = document.getElementById('id-hint');
   const input = document.getElementById('informant-id');
 
-  if (value.length === 0) {
-    hint.textContent = '格式：英文前綴 + 數字';
-    hint.classList.remove('err');
-    input.classList.remove('invalid');
-  } else if (!idValid && idTouched) {
+  if (!idValid && idTouched && value.length > 0) {
     hint.textContent = '請輸入完整的情報員編號';
     hint.classList.add('err');
     input.classList.add('invalid');
   } else {
-    hint.textContent = '';
+    hint.textContent = '格式：INF + 10 碼英數（共 13 碼）';
     hint.classList.remove('err');
     input.classList.remove('invalid');
   }
@@ -315,13 +346,12 @@ async function submitForm() {
   btn.textContent = '送出中…';
   hideError();
 
-  const informantId = document.getElementById('informant-id').value.trim();
-  const item = MOCK_ITEMS.find(i => i.id === selectedItemId);
+  const informantNo = document.getElementById('informant-id').value.trim();
+  const item = items.find(i => i.id === selectedItemId);
 
   try {
-    // TODO: 替換為 POST /exchange/apply
-    const result = await mockApply(informantId, item);
-    showSuccessPage(result);
+    const result = await callApply(informantNo, item);
+    showSuccessPage(result, item, informantNo);
   } catch (err) {
     showError(err.message);
     btn.disabled = false;
@@ -329,24 +359,29 @@ async function submitForm() {
   }
 }
 
-// ── Mock API（TODO: 替換為真實 POST /exchange/apply）────────────────────────
-async function mockApply(informantId, item) {
-  await new Promise(r => setTimeout(r, 800));
-
-  // 模擬錯誤回傳（測試用；正式串接後移除）
-  // throw new Error('找不到此情報員編號，請確認後重試');
-
-  return {
-    informant_id_masked: maskId(informantId),
-    item_label: item.label,
-    amount: item.amount,
-  };
+// ── API：送出兌換申請 ─────────────────────────────────────────────────────────
+async function callApply(informantNo, item) {
+  const res = await fetch(`${API_BASE}/api/redemptions/apply`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      informantNo,
+      items: item.id,
+      amountPoints: item.points,
+    }),
+  });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.message || '申請失敗，請稍後重試');
+  }
+  return res.json();
 }
 
 // ── 顯示成功頁 ───────────────────────────────────────────────────────────────
-function showSuccessPage(result) {
+function showSuccessPage(result, localItem, enteredNo) {
+  const displayNo = result.informantNo ? maskId(result.informantNo) : maskId(enteredNo);
   document.getElementById('success-summary').innerHTML =
-    `編號 <b>${result.informant_id_masked}</b>・${result.item_label} <b>NT$${fmtNum(result.amount)}</b>`;
+    `編號 <b>${displayNo}</b>・${localItem.label} <b>NT$${fmtNum(localItem.amount)}</b>`;
 
   document.getElementById('sec-items').style.display = 'none';
   document.getElementById('sec-form').style.display = 'none';
@@ -377,8 +412,12 @@ function maskId(id) {
   return `${prefix}-${masked}`;
 }
 
-function fmtNum(n) { return n.toLocaleString('zh-TW'); }
-function fmtPts(n) { return n.toLocaleString('zh-TW') + ' 積分'; }
+function fmtNum(n) { 
+    return n.toLocaleString('zh-TW'); 
+  }
+function fmtPts(n) { 
+  return n.toLocaleString('zh-TW') + ' 積分'; 
+  }
 </script>
 </body>
 </html>
