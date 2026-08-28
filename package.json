@@ -1,0 +1,10 @@
+{
+  "name": "redemption-site",
+  "private": true,
+  "scripts": {
+    "dev": "vite --port 5174"
+  },
+  "devDependencies": {
+    "vite": "^6.0.0"
+  }
+}

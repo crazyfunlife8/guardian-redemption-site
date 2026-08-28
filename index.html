@@ -183,7 +183,7 @@ footer .co{margin-top:8px}
 
 <script>
 // ── API 設定（TODO: 正式部署前替換為後端 API URL）────────────────────────────
-const API_BASE = 'https://guardian.nest-creation.com';
+const API_BASE = '';
 
 // ── 前端專屬圖示與樣式（API 不回傳，依 item.id 對應）──────────────────────
 const ITEM_DISPLAY = {
@@ -403,13 +403,12 @@ function hideError() {
 
 // ── 工具 ─────────────────────────────────────────────────────────────────────
 function maskId(id) {
-  const sep = id.lastIndexOf('-');
-  if (sep === -1) return id;
-  const prefix = id.slice(0, sep);
-  const suffix = id.slice(sep + 1);
   const keep = 2;
-  const masked = '●'.repeat(Math.max(0, suffix.length - keep)) + suffix.slice(-keep);
-  return `${prefix}-${masked}`;
+  if (id.length <= keep + 3) return id;
+  const prefix = id.slice(0, 3);
+  const masked = '●'.repeat(id.length - 3 - keep);
+  const suffix = id.slice(-keep);
+  return `${prefix}${masked}${suffix}`;
 }
 
 function fmtNum(n) { 
