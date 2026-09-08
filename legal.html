@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>服務說明與隱私聲明 — 兌換中心</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#FAF7F2; --card:#FFFFFF; --ink:#2B2B33; --ink-soft:#6E6E78;
+  --brand:#2E6E5E; --brand-soft:#E7F0ED; --accent:#D98E4A;
+  --line:#E8E2D9; --error:#C4554D; --warn:#B45309; --warn-bg:#FEF9EE; --warn-border:#F0D898;
+  --sans:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;
+  --serif:"Noto Serif TC",serif;
+  --mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.65}
+.wrap{max-width:720px;margin:0 auto;padding:0 20px}
+
+/* 頁首 */
+header{padding:48px 0 32px}
+.back{display:inline-flex;align-items:center;gap:6px;color:var(--ink-soft);font-size:14px;text-decoration:none;margin-bottom:24px;transition:color .15s}
+.back:hover{color:var(--brand)}
+.logo{display:inline-grid;place-items:center;width:64px;height:64px;border-radius:18px;background:var(--brand);color:#fff;font-family:var(--serif);font-size:30px;margin-bottom:18px}
+h1{font-family:var(--serif);font-size:28px;letter-spacing:.04em}
+h1 small{display:block;font-family:var(--sans);font-size:13px;color:var(--ink-soft);font-weight:400;letter-spacing:.2em;margin-top:6px}
+
+/* 分頁標籤 */
+.tab-bar{display:flex;justify-content:center;border-bottom:2px solid var(--line);margin-bottom:28px}
+.tab-btn{flex:none;padding:12px 28px;background:none;border:none;font-family:var(--sans);font-size:15px;font-weight:500;color:var(--ink-soft);cursor:pointer;border-bottom:2.5px solid transparent;margin-bottom:-2px;transition:color .15s,border-color .15s;white-space:nowrap}
+.tab-btn:hover{color:var(--ink)}
+.tab-btn.active{color:var(--brand);border-bottom-color:var(--brand);font-weight:700}
+
+/* 分頁內容 */
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+
+/* 草稿 Banner */
+.draft{display:flex;gap:10px;align-items:flex-start;background:var(--warn-bg);border:1px solid var(--warn-border);border-radius:10px;padding:12px 16px;margin-bottom:28px;font-size:13px;color:var(--warn);line-height:1.55}
+.draft-icon{flex:none;font-size:15px;line-height:1}
+
+/* 法律文件排版 */
+.legal{padding-bottom:56px}
+.legal h2{font-family:var(--serif);font-size:17px;font-weight:700;color:var(--ink);margin-top:32px;margin-bottom:12px;border-bottom:1px solid var(--line);padding-bottom:8px}
+.legal h3{font-size:15px;font-weight:700;color:var(--ink);margin-top:20px;margin-bottom:8px}
+.legal p{font-size:14px;color:var(--ink);line-height:1.75;margin-bottom:10px}
+.legal ul{padding-left:0;list-style:none;margin-bottom:10px}
+.legal ul li{font-size:14px;color:var(--ink);line-height:1.75;margin-bottom:6px;display:flex;gap:8px}
+.legal ul li::before{content:"—";color:var(--ink-soft);flex:none}
+.legal ol{padding-left:0;list-style:none;counter-reset:ol-counter;margin-bottom:10px}
+.legal ol li{font-size:14px;color:var(--ink);line-height:1.75;margin-bottom:8px;display:flex;gap:8px;counter-increment:ol-counter}
+.legal ol li::before{content:counter(ol-counter)".";color:var(--ink-soft);flex:none;min-width:20px}
+.legal .highlight{background:var(--brand-soft);border-radius:8px;padding:12px 16px;margin-bottom:12px;font-size:14px;line-height:1.65}
+.legal .highlight b{color:var(--brand)}
+
+/* 資料表格 */
+.data-table{width:100%;border-collapse:collapse;font-size:14px;margin-bottom:16px;line-height:1.6}
+.data-table th{background:var(--brand-soft);color:var(--brand);font-weight:600;padding:9px 14px;text-align:left;border:1px solid var(--line)}
+.data-table td{padding:9px 14px;border:1px solid var(--line);color:var(--ink);vertical-align:top}
+.data-table tr:nth-child(even) td{background:#FDFCFA}
+
+/* 步驟 */
+.steps{counter-reset:step;display:grid;gap:12px;margin-bottom:12px}
+.step{display:flex;gap:14px;align-items:flex-start;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;counter-increment:step}
+.step-num{flex:none;width:28px;height:28px;border-radius:50%;color:#fff;font-family:var(--mono);font-size:13px;font-weight:600;display:grid;place-items:center}
+.step-num-1{background:#2e6e5e}
+.step-num-2{background:#3d8f7a}
+.step-num-3{background:#00ac81}
+.step-num-4{background:#00d19d}
+.step-num-5{background:#00e9af}
+.step-body{font-size:14px;line-height:1.65}
+.step-body b{display:block;font-weight:600;margin-bottom:2px}
+
+.legal .updated{font-size:13px;color:var(--ink-soft);margin-top:28px;padding-top:16px;border-top:1px solid var(--line)}
+
+/* 頁尾 */
+footer{border-top:1px solid var(--line);margin-top:16px;padding:26px 0 44px;font-size:13px;color:var(--ink-soft);text-align:center}
+footer a{color:var(--ink-soft);text-decoration:none}
+footer a:hover{color:var(--brand)}
+footer .co{margin-top:8px}
+
+@media(max-width:640px){
+  header{padding:32px 0 20px}
+  h1{font-size:22px}
+  .tab-btn{padding:10px 18px;font-size:14px}
+  .data-table{font-size:13px}
+  .data-table th,.data-table td{padding:8px 10px}
+}
+</style>
+</head>
+<body>
+
+<header class="wrap">
+  <a href="index.html" class="back">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    返回兌換中心
+  </a>
+  <div style="display:flex;flex-direction:column;align-items:center">
+    <div class="logo">兌</div>
+    <h1>服務說明與隱私聲明 <small>守護者・LEGAL DOCUMENTS</small></h1>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="tab-bar">
+    <button class="tab-btn" data-tab="privacy">隱私聲明</button>
+    <button class="tab-btn active" data-tab="terms">服務說明</button>
+  </div>
+
+  <!-- ── 服務說明 ──────────────────────────────────────────────────── -->
+  <div class="tab-panel active legal" id="tab-terms">
+    <div class="draft">
+      <span class="draft-icon">ⓘ</span>
+      草稿版本（2026-08-31）— 本文件尚待業主確認及律師審閱定稿，不具法律效力。
+    </div>
+
+    <h2>關於兌換中心</h2>
+    <p>兌換中心是【公司名稱】（以下簡稱「本公司」）為守護者 App 情報員提供的積分兌換服務網站。</p>
+    <p>情報員透過守護者 App 執行路況查核任務所累積之積分，得於本網站提出兌換現金及禮券等禮品之申請。</p>
+
+    <h2>兌換資格</h2>
+    <ul>
+      <li>僅限持有有效情報員編號之守護者 App 情報員。</li>
+      <li>情報員帳戶狀態須為正常（未受停權或除名處分）。</li>
+      <li>單筆兌換金額不得達 NT$20,000（含），達此金額請分次申請。</li>
+    </ul>
+
+    <h2>兌換流程</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num step-num-1">1</div>
+        <div class="step-body">
+          <b>填寫情報員編號</b>
+          輸入您在守護者 App 中的情報員編號（格式：字母開頭＋數字）。
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num step-num-2">2</div>
+        <div class="step-body">
+          <b>選擇兌換品項</b>
+          選擇您欲兌換的項目（現金等值品項，以積分計價）。
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num step-num-3">3</div>
+        <div class="step-body">
+          <b>送出申請</b>
+          確認無誤後按下送出，申請將進入人工審核流程。
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num step-num-4">4</div>
+        <div class="step-body">
+          <b>等待撥款</b>
+          本公司專人核對您的積分餘額及綁定帳戶後，通常於【X】個工作天內完成匯款。
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num step-num-5">5</div>
+        <div class="step-body">
+          <b>進度查詢</b>
+          請於守護者 App 帳本頁面查看申請進度及積分異動紀錄。
+        </div>
+      </div>
+    </div>
+
+    <h2>重要說明</h2>
+
+    <h3>帳戶綁定</h3>
+    <p>匯款僅匯入您於申請情報員時所綁定之指定收款帳戶，恕不受理臨時變更帳戶之請求。如需變更帳戶，請先於守護者 App 提出資料變更申請，待後台審核通過後再行提出兌換。</p>
+
+    <h3>稅務責任</h3>
+    <p>積分兌換所得之現金屬個人所得，情報員應依中華民國稅法（含所得稅法）自行申報及繳納相關稅款，本公司不負代為申報之義務。</p>
+
+    <h3>積分非財產</h3>
+    <p>積分不具有法定貨幣性質，不得轉讓、出售、繼承或與他人之積分合併。積分之有效性及兌換規則由本公司訂定，得依營運需要調整，調整前將透過守護者 App 通知。</p>
+
+    <h2>否認機制</h2>
+    <p>若您發現有人使用您的情報員編號提出非本人之兌換申請，請立即於守護者 App 帳本頁面使用「一鍵否認」功能，或透過 LINE 客服（【LINE OA 連結】）聯繫本公司緊急處理。</p>
+    <p>本公司在申請審核完成前，將保留停止處理可疑申請之權利。</p>
+
+    <h2>免責聲明</h2>
+    <p>本公司保留拒絕或取消任何兌換申請之權利，包含但不限於：情報員帳戶異常、積分餘額不足、帳戶驗證失敗、或申請資訊不符等情形。本公司不就任何因服務中斷、系統錯誤或不可抗力事件所造成之積分損失承擔賠償責任。</p>
+
+    <h2>聯絡客服</h2>
+    <p>如對兌換申請有任何疑問，請透過以下方式聯繫：</p>
+    <ul>
+      <li>LINE 客服：【LINE OA 連結】（營業時間：【時間】）</li>
+      <li>電子郵件：【聯絡信箱】</li>
+    </ul>
+
+    <p class="updated">最後更新日期：2026-08-31　／　Draft v1.0</p>
+  </div>
+
+  <!-- ── 隱私聲明 ──────────────────────────────────────────────── -->
+  <div class="tab-panel legal" id="tab-privacy">
+    <div class="draft">
+      <span class="draft-icon">ⓘ</span>
+      草稿版本（2026-08-31）— 本文件尚待業主確認及律師審閱定稿，不具法律效力。
+    </div>
+
+    <p>本聲明說明兌換中心網站如何蒐集及處理您的個人資料，依中華民國《個人資料保護法》制定。</p>
+
+    <h2>資料控制者</h2>
+    <p>【公司全名】（統一編號【統編】），地址【地址】。</p>
+
+    <h2>蒐集之資料</h2>
+    <p>使用本網站提出兌換申請時，本公司蒐集以下資料：</p>
+    <table class="data-table">
+      <thead>
+        <tr><th>資料</th><th>內容</th><th>用途</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>情報員編號</td><td>您輸入之編號</td><td>核對身份及積分餘額</td></tr>
+        <tr><td>兌換品項</td><td>您選擇之兌換項目</td><td>處理申請</td></tr>
+        <tr><td>申請積分數量</td><td>本次申請之積分數</td><td>核對餘額及計算金額</td></tr>
+        <tr><td>申請時間</td><td>送出申請之時間戳記</td><td>申請紀錄</td></tr>
+        <tr><td>IP 位址</td><td>您連線時的 IP 位址</td><td>安全防護、異常偵測</td></tr>
+      </tbody>
+    </table>
+    <div class="highlight">
+      <b>本網站不使用 Cookie 追蹤您的瀏覽行為，亦不安裝任何第三方追蹤程式。</b>
+    </div>
+    <p>本網站不蒐集您的姓名、身分證字號、銀行帳號等敏感資料，這些資料均已儲存於守護者 App 系統，匯款時由後台直接調用，不重複蒐集。</p>
+
+    <h2>資料使用目的</h2>
+    <p>蒐集之資料僅用於：</p>
+    <ol>
+      <li>核對您的情報員身份及積分餘額。</li>
+      <li>處理並完成本次兌換申請。</li>
+      <li>維護申請紀錄以供日後查詢或爭議處理。</li>
+      <li>偵測異常申請行為，防止未授權使用。</li>
+    </ol>
+    <div class="highlight">
+      <b>本公司不將上述資料用於行銷目的，亦不提供予任何第三方，但依法令規定或主管機關命令者除外。</b>
+    </div>
+
+    <h2>資料保存期間</h2>
+    <table class="data-table">
+      <thead>
+        <tr><th>資料</th><th>保存期間</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>兌換申請紀錄（含情報員編號、品項、金額）</td><td>完成後【X】年（依稅法規定）</td></tr>
+        <tr><td>IP 位址及存取日誌</td><td>【X】個月</td></tr>
+      </tbody>
+    </table>
+
+    <h2>您的權利</h2>
+    <p>您得依個資法向本公司請求查詢、閱覽、複製、補正或刪除您的個人資料。請透過以下方式提出申請，本公司將於【15】個工作天內回覆：</p>
+    <ul>
+      <li>電子郵件：【聯絡信箱】</li>
+    </ul>
+
+    <h2>隱私聲明修訂</h2>
+    <p>本聲明得不定期更新，修訂時將於本頁面標示最新版本日期。建議您定期查閱。</p>
+
+    <p class="updated">最後更新日期：2026-08-31　／　Draft v1.0</p>
+  </div>
+</main>
+
+<footer class="wrap">
+  <a href="index.html">返回兌換中心</a>
+  <div class="co">◯◯有限公司・統一編號 00000000（依法揭露之最小集、佔位）</div>
+</footer>
+
+<script>
+const tabs = document.querySelectorAll('.tab-btn');
+const panels = document.querySelectorAll('.tab-panel');
+
+function switchTab(tabId) {
+  tabs.forEach(btn => btn.classList.toggle('active', btn.dataset.tab === tabId));
+  panels.forEach(panel => panel.classList.toggle('active', panel.id === 'tab-' + tabId));
+  history.replaceState(null, '', '#' + tabId);
+}
+
+tabs.forEach(btn => btn.addEventListener('click', () => switchTab(btn.dataset.tab)));
+
+const hash = location.hash.replace('#', '');
+if (hash === 'terms' || hash === 'privacy') switchTab(hash);
+</script>
+</body>
+</html>

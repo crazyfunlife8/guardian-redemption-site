@@ -33,18 +33,13 @@ h1 small{display:block;font-family:var(--sans);font-size:13px;color:var(--ink-so
 
 /* 兌換項目卡 */
 .items{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
-.item{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 18px;cursor:pointer;transition:transform .15s,box-shadow .15s;display:grid;gap:8px;user-select:none}
+.item{background:var(--card);border:1px solid var(--line);border-top-width:3px;border-radius:14px;padding:20px 18px;cursor:pointer;transition:transform .15s,box-shadow .15s;display:grid;gap:8px;user-select:none}
 .item:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(43,43,51,.08)}
-.item.cash.active{box-shadow:0 0 0 2.5px var(--brand);transform:translateY(-2px)}
-.item.oil.active{box-shadow:0 0 0 2.5px var(--accent);transform:translateY(-2px)}
-.item.gift.active{box-shadow:0 0 0 2.5px #8A7BA8;transform:translateY(-2px)}
+.item.active{transform:translateY(-2px)}
 .item .icon{font-size:26px}
 .item h3{font-size:17px}
 .item p{font-size:13px;color:var(--ink-soft)}
 .item .pts{font-family:var(--mono);font-size:14px;color:var(--brand);font-weight:600}
-.item.oil{border-top:3px solid var(--accent)}
-.item.cash{border-top:3px solid var(--brand)}
-.item.gift{border-top:3px solid #8A7BA8}
 
 /* 表單 */
 .form-card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:26px 24px;display:grid;gap:20px}
@@ -107,7 +102,7 @@ footer .co{margin-top:8px}
 
 <header class="wrap">
   <div class="logo">兌</div>
-  <h1>兌換中心 <small>品牌名待定・REDEMPTION SERVICE</small></h1>
+  <h1>兌換中心 <small>守護者・REDEMPTION SERVICE</small></h1>
   <p class="tagline">完成任務累積的積分，在這裡兌換。</p>
 </header>
 
@@ -177,7 +172,7 @@ footer .co{margin-top:8px}
 </main>
 
 <footer class="wrap">
-  <a href="#">隱私政策</a>・<a href="#">服務說明</a>（律師定稿版佔位）
+  <a href="legal.html#privacy">隱私聲明</a>・<a href="legal.html#terms">服務說明</a>（律師定稿版佔位）
   <div class="co">◯◯有限公司・統一編號 00000000（依法揭露之最小集、佔位）</div>
 </footer>
 
@@ -185,18 +180,14 @@ footer .co{margin-top:8px}
 // ── API 設定（TODO: 正式部署前替換為後端 API URL）────────────────────────────
 const API_BASE = '';
 
-// ── 前端專屬圖示與樣式（API 不回傳，依 item.id 對應）──────────────────────
-const ITEM_DISPLAY = {
-  cash: { icon: '💵', cardClass: 'cash' },
-  oil:  { icon: '⛽', cardClass: 'oil'  },
-  gift: { icon: '🎁', cardClass: 'gift' },
-};
+// ── 顏色備援（API 未回傳 color 時依序取用）──────────────────────────────────
+const FALLBACK_COLORS = ['#2E6E5E','#D98E4A','#8A7BA8','#4A8AB9','#C4554D','#5E8A3E'];
 
 // ── 靜態費率（API 端點補齊前的 fallback）────────────────────────────────────
 const FALLBACK_ITEMS = [
-  { id: 'cash', label: '現金',   note: '匯入您綁定的收款帳戶', points: 1000, amount: 1000, blocked: false, icon: '💵', cardClass: 'cash' },
-  { id: 'oil',  label: '加油券', note: '紙本／電子券擇一寄發',  points: 2900, amount: 3000, blocked: false, icon: '⛽', cardClass: 'oil'  },
-  { id: 'gift', label: '禮券',   note: '合作通路禮券',          points: 1450, amount: 1500, blocked: false, icon: '🎁', cardClass: 'gift' },
+  { id: 'cash', label: '現金',   note: '匯入您綁定的收款帳戶', points: 1000, amount: 1000, blocked: false, icon: '💵', color: '#2E6E5E' },
+  { id: 'oil',  label: '加油券', note: '紙本／電子券擇一寄發',  points: 2900, amount: 3000, blocked: false, icon: '⛽', color: '#D98E4A' },
+  { id: 'gift', label: '禮券',   note: '合作通路禮券',          points: 1450, amount: 1500, blocked: false, icon: '🎁', color: '#8A7BA8' },
 ];
 
 // ── 狀態 ────────────────────────────────────────────────────────────────────
@@ -224,15 +215,15 @@ async function loadItems() {
     const res = await fetch(`${API_BASE}/api/redemptions/items`);
     if (!res.ok) throw new Error('items fetch failed');
     const data = await res.json();
-    items = (data.items ?? []).map(d => ({
-      id:        d.id,
-      label:     d.label,
-      note:      d.note      ?? '',
-      points:    d.pointsRequired,
-      amount:    d.amount,
-      blocked:   d.blocked   ?? false,
-      icon:      ITEM_DISPLAY[d.id]?.icon      ?? '📦',
-      cardClass: ITEM_DISPLAY[d.id]?.cardClass ?? '',
+    items = (data.items ?? []).map((d, i) => ({
+      id:      d.id,
+      label:   d.label,
+      note:    d.note    ?? '',
+      points:  d.pointsRequired,
+      amount:  d.amount,
+      blocked: d.blocked ?? false,
+      icon:    d.icon    ?? '📦',
+      color:   d.color   ?? FALLBACK_COLORS[i % FALLBACK_COLORS.length],
     }));
   } catch {
     items = FALLBACK_ITEMS;
@@ -243,7 +234,8 @@ async function loadItems() {
 function renderItemCards() {
   const grid = document.getElementById('item-grid');
   grid.innerHTML = items.map(item => `
-    <div class="item ${item.cardClass}" data-item-id="${item.id}"
+    <div class="item" data-item-id="${item.id}"
+         style="border-top-color:${item.color}"
          role="button" tabindex="0" aria-label="選擇 ${item.label}">
       <span class="icon">${item.icon}</span>
       <h3>${item.label}</h3>
@@ -304,7 +296,10 @@ function onRadioChange(itemId) {
 // ── 視覺同步 ─────────────────────────────────────────────────────────────────
 function syncHighlights() {
   document.querySelectorAll('#item-grid .item').forEach(el => {
-    el.classList.toggle('active', el.dataset.itemId === selectedItemId);
+    const active = el.dataset.itemId === selectedItemId;
+    el.classList.toggle('active', active);
+    const color = items.find(i => i.id === el.dataset.itemId)?.color ?? 'var(--brand)';
+    el.style.boxShadow = active ? `0 0 0 2.5px ${color}` : '';
   });
   document.querySelectorAll('#opts-container .opt').forEach(el => {
     el.classList.toggle('on', el.dataset.itemId === selectedItemId && !el.classList.contains('blocked'));
